@@ -1,0 +1,5 @@
+FROM docker:17.10-dind
+
+COPY ./dind.sh /
+
+CMD ["sh", "/dind.sh"]
