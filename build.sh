@@ -21,8 +21,8 @@ HISTORY_FOLDER=$PWD/history
 # (Should be the responsibility of the mounting config, but just in case)
 if [ ! -e /root/.ssh/id_rsa ]; then
   echo $SSH_KEY > /root/.ssh/id_rsa
+  chmod 600 /root/.ssh/id_rsa
 fi
-chmod 700 /root/.ssh/id_rsa
 
 # Go to the project folder
 cd project
