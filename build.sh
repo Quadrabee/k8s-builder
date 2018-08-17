@@ -1,5 +1,15 @@
 #!/usr/bin/env sh
-set -e
+set -eo pipefail
+
+# Die handler
+die () {
+  echo "$0: $@" >&2
+  # Used to notify the sidecars container we have failed
+  touch /builder/project/build.failed /builder/project/build.terminated
+  exit 1;
+}
+
+trap die ERR
 
 # Generate a build UUID
 UUID=$(cat /proc/sys/kernel/random/uuid)
@@ -9,9 +19,9 @@ if [ -z "$KEEP_HISTORY" ]; then
   KEEP_HISTORY=3
 fi
 
-# What branch do we build (defaults to "master")
-if [ -z "$GIT_BRANCH" ]; then
-  GIT_BRANCH="master"
+# What branch/tag do we build (defaults to "master")
+if [ -z "$GIT_REF" ]; then
+  GIT_REF="master"
 fi
 
 # The history folder
@@ -20,7 +30,7 @@ HISTORY_FOLDER=$PWD/history
 # Make sure the private key is secure
 # (Should be the responsibility of the mounting config, but just in case)
 if [ ! -e /root/.ssh/id_rsa ]; then
-  echo $SSH_KEY > /root/.ssh/id_rsa
+  printf "$SSH_KEY" > /root/.ssh/id_rsa
   chmod 600 /root/.ssh/id_rsa
 fi
 
@@ -40,23 +50,22 @@ fi
 
 #
 cd app
-echo "Updating folder, using branch $GIT_BRANCH"
+echo "Updating folder, using ref $GIT_REF"
 git remote update
 git fetch
-git checkout $GIT_BRANCH
-git reset --hard origin/$GIT_BRANCH
+
+if [ "${GIT_REF:0:4}" = "refs" ]; then
+  git checkout $GIT_REF
+else
+  git checkout $GIT_REF
+  git reset --hard origin/$GIT_REF
+fi
 
 # login to the private registry
 if [ ! -z "$DOCKER_USER" ]; then
   echo "Logging in to docker registry $DOCKER_REGISTRY, using user $DOCKER_USER"
   docker -D login -u $DOCKER_USER -p $DOCKER_PWD $DOCKER_REGISTRY
 fi
-
-# Die handler
-die () {
-  echo "$0: $@" >&2
-  exit 1;
-}
 
 # Build!
 echo "Starting the build. Make target $MAKE_TARGET"
@@ -66,19 +75,21 @@ echo "Make finished"
 
 # If we have a history volume mounted, we save this successfull build
 if [ -d $HISTORY_FOLDER ]; then
+
   echo "Backing up the build folder"
   cd ..
   cp -r app $HISTORY_FOLDER/$UUID
   ln -sf $HISTORY_FOLDER/$UUID $HISTORY_FOLDER/latest
-fi
 
-# We check if we have too many builds in history
-HISTORY_COUNT=$(ls -1t $HISTORY_FOLDER | grep -v latest | wc -l)
-if [[ $HISTORY_COUNT -gt $KEEP_HISTORY ]]; then
-  echo "Keeping only $KEEP_HISTORY builds, cleaning old ones..."
-  ls -1tr $HISTORY_FOLDER | grep -v latest | head -n -$KEEP_HISTORY | while IFS= read -r f; do
-    rm -rf "$f"
-  done
+  # We check if we have too many builds in history
+  HISTORY_COUNT=$(ls -1t $HISTORY_FOLDER | grep -v latest | wc -l)
+  if [[ $HISTORY_COUNT -gt $KEEP_HISTORY ]]; then
+    echo "Keeping only $KEEP_HISTORY builds, cleaning old ones..."
+    ls -1tr $HISTORY_FOLDER | grep -v latest | head -n -$KEEP_HISTORY | while IFS= read -r f; do
+      rm -rf "$f"
+    done
+  fi
+
 fi
 
 echo "Builder is done... bye!"
