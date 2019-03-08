@@ -55,6 +55,7 @@ git remote update
 git fetch
 
 if [ "${GIT_REF:0:4}" = "refs" ]; then
+  git fetch --tags
   git checkout $GIT_REF
 else
   git checkout $GIT_REF
