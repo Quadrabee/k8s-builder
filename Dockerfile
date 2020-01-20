@@ -15,7 +15,10 @@ RUN apk add --update \
     vim \
     bash \
     curl \
-    ca-certificates
+    ca-certificates \
+    py-pip python-dev libffi-dev openssl-dev gcc libc-dev
+
+RUN pip install docker-compose
 
 RUN mkdir -p /root/.ssh/ \
 
@@ -24,7 +27,6 @@ RUN mkdir -p /root/.ssh/ \
     mkdir project
 
 RUN ssh-keyscan github.com >> /root/.ssh/known_hosts && \
-    ssh-keyscan q8s.quadrabee.com >> /root/.ssh/known_hosts && \
     ssh-keyscan bitbucket.org >> /root/.ssh/known_hosts
 
 COPY ./build.sh /builder
