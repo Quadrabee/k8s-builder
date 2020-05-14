@@ -1,6 +1,16 @@
 #!/usr/bin/env sh
 set -e
 
+mkdir -p /etc/docker/
+
+## Unfortunately jenkins doesn't support 'subPath' secret mounting
+## Our hack is to look for /etc/docker.d/* files, and we copy them
+## into /etc/docker/ before starting
+if [ -d /etc/docker.d/ ]; then
+  echo "Copying docker.d/ config files..."
+  cp /etc/docker.d/* /etc/docker/
+fi
+
 dockerd-entrypoint.sh &
 CHILD_PID=$!
 (while true; do if [[ -f "/builder/project/build.terminated" ]]; then kill $CHILD_PID; echo "Killed $CHILD_PID as the main container terminated."; fi; sleep 1; done) &
