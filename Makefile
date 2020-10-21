@@ -1,9 +1,9 @@
 default: build push
 
 build:
-	docker build -t quadrabee/k8s-builder .
-	docker build -t quadrabee/k8s-builder:dind . -f Dockerfile.dind
+	docker build -t quadrabee/k8s-builder:2.0 .
+	docker build -t quadrabee/k8s-builder-dind:2.0 . -f Dockerfile.dind
 
 push:
-	docker push quadrabee/k8s-builder
-	docker push quadrabee/k8s-builder:dind
+	docker push quadrabee/k8s-builder:2.0
+	docker push quadrabee/k8s-builder-dind:2.0
