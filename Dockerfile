@@ -10,6 +10,7 @@ RUN chmod +x /usr/local/bin/kubectl
 RUN apk add --update \
     openssh-client \
     docker \
+    docker-compose \
     git \
     make \
     vim \
@@ -17,8 +18,6 @@ RUN apk add --update \
     curl \
     ca-certificates \
     py-pip python3-dev libffi-dev openssl-dev gcc libc-dev
-
-RUN pip install docker-compose
 
 # gsutil
 RUN curl -sSL https://sdk.cloud.google.com | bash
