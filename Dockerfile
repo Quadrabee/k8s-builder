@@ -15,6 +15,7 @@ RUN apk add --update \
     make \
     vim \
     bash \
+    gettext \
     curl \
     ca-certificates \
     py-pip python3-dev libffi-dev openssl-dev gcc libc-dev
