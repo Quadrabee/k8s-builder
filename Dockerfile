@@ -20,9 +20,21 @@ RUN apk add --update \
     ca-certificates \
     py-pip python3-dev libffi-dev openssl-dev gcc libc-dev
 
+# .NET deps (for cyclonedx-cli)
+RUN apk add bash icu-libs krb5-libs libgcc libintl libssl1.1 libstdc++ zlib
+
+# cyclonedex-cli
+RUN wget https://github.com/CycloneDX/cyclonedx-cli/releases/download/v0.19.0/cyclonedx-linux-musl-x64 && \
+    chmod +x cyclonedx-linux-musl-x64 && \
+    mv cyclonedx-linux-musl-x64 /usr/bin/cyclonedx
+
 # gsutil
 RUN curl -sSL https://sdk.cloud.google.com | bash
 ENV PATH $PATH:/root/google-cloud-sdk/bin
+
+# grype & syft
+RUN curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
+RUN curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
 
 RUN mkdir -p /root/.ssh/ \
 
