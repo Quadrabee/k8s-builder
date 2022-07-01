@@ -1,4 +1,4 @@
-FROM alpine
+FROM node:14-alpine
 
 WORKDIR /builder
 
@@ -35,6 +35,9 @@ ENV PATH $PATH:/root/google-cloud-sdk/bin
 # grype & syft
 RUN curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
 RUN curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
+
+# mustache
+RUN npm install -g mustache
 
 RUN mkdir -p /root/.ssh/ \
 
