@@ -18,7 +18,9 @@ RUN apk add --update \
     gettext \
     curl \
     ca-certificates \
-    py-pip python3-dev libffi-dev openssl-dev gcc libc-dev
+    py-pip python3-dev libffi-dev \
+    openssl openssl-dev\
+    gcc libc-dev
 
 # .NET deps (for cyclonedx-cli)
 RUN apk add bash icu-libs krb5-libs libgcc libintl libssl1.1 libstdc++ zlib
