@@ -1,7 +1,9 @@
+FROM jenkins/inbound-agent:3077.vd69cf116da_6f-3-jdk11 as jenkins-agent
 FROM node:14-alpine
 
 WORKDIR /builder
 
+COPY --from=jenkins-agent /usr/local/bin/jenkins-agent /usr/local/bin/jenkins-agent
 ADD https://storage.googleapis.com/kubernetes-release/release/v1.19.3/bin/linux/amd64/kubectl /usr/local/bin/kubectl
 
 RUN chmod +x /usr/local/bin/kubectl
@@ -59,6 +61,3 @@ RUN ssh-keyscan github.com >> /root/.ssh/known_hosts && \
 
 RUN git config --global --add safe.directory '*'
 
-COPY ./build.sh /builder
-
-CMD ["bash", "./build.sh"]

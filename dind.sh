@@ -14,7 +14,7 @@ fi
 ## Disable encryption
 export DOCKER_TLS_CERTDIR=""
 
-dockerd-entrypoint.sh --mtu 1200 &
+dockerd-entrypoint.sh --mtu 1200 --tlsverify &
 CHILD_PID=$!
 (while true; do if [[ -f "/builder/project/build.terminated" ]]; then kill $CHILD_PID; echo "Killed $CHILD_PID as the main container terminated."; fi; sleep 1; done) &
 wait $CHILD_PID
