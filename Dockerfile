@@ -4,6 +4,7 @@ FROM node:14-alpine
 WORKDIR /builder
 
 COPY --from=jenkins-agent /usr/local/bin/jenkins-agent /usr/local/bin/jenkins-agent
+COPY --from=jenkins-agent /usr/share/jenkins /usr/share/jenkins
 ADD https://storage.googleapis.com/kubernetes-release/release/v1.19.3/bin/linux/amd64/kubectl /usr/local/bin/kubectl
 
 RUN chmod +x /usr/local/bin/kubectl
@@ -22,7 +23,8 @@ RUN apk add --update \
     ca-certificates \
     py-pip python3-dev libffi-dev \
     openssl openssl-dev\
-    gcc libc-dev
+    gcc libc-dev \
+    openjdk11 tzdata
 
 # .NET deps (for cyclonedx-cli)
 RUN apk add bash icu-libs krb5-libs libgcc libintl libssl1.1 libstdc++ zlib
@@ -60,4 +62,6 @@ RUN ssh-keyscan github.com >> /root/.ssh/known_hosts && \
     ssh-keyscan bitbucket.org >> /root/.ssh/known_hosts
 
 RUN git config --global --add safe.directory '*'
+
+ENTRYPOINT ["/usr/local/bin/jenkins-agent"]
 
